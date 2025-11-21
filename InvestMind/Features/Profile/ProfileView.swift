@@ -12,6 +12,10 @@ struct ProfileView: View {
         }
         .background(AppColors.backgroundPrimary.ignoresSafeArea())
         .navigationTitle("Профиль")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.backgroundPrimary, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 
     private var header: some View {

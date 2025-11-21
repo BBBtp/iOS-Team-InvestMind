@@ -28,7 +28,7 @@ struct Asset: Identifiable, Hashable {
     let icon: String
 }
 
-struct PortfolioAsset: Identifiable {
+struct PortfolioAsset: Identifiable, Hashable {
     let id = UUID()
     let asset: Asset
     let amount: Double
@@ -39,10 +39,17 @@ struct PortfolioAsset: Identifiable {
     }
 }
 
-struct PortfolioSummary {
+struct PortfolioSummary : Hashable {
     let totalValue: Double
     let invested: Double
     let dailyChange: Double
+}
+
+struct UserPortfolio: Identifiable, Hashable {
+    let id = UUID()
+    let name: String
+    let summary: PortfolioSummary
+    let assets: [PortfolioAsset]
 }
 
 struct GuideStep: Identifiable {
@@ -60,10 +67,8 @@ struct OnboardingPage: Identifiable {
 }
 
 enum AppRoute: Hashable {
-    case dashboard
     case stockDetail(Asset)
-    case portfolio
-    case profile
+    case portfolioDetail(UserPortfolio)
 }
 
 enum FlowStep {
@@ -79,10 +84,25 @@ enum FlowStep {
 enum MockData {
     static let assets: [Asset] = [
         Asset(ticker: "AAPL", name: "Apple", price: 189.54, change: .up(2.31), icon: "applelogo"),
+        Asset(ticker: "MSFT", name: "Microsoft", price: 378.85, change: .up(1.12), icon: "desktopcomputer"),
+        Asset(ticker: "GOOGL", name: "Alphabet Class A", price: 132.67, change: .down(0.84), icon: "globe"),
+        Asset(ticker: "NVDA", name: "NVIDIA", price: 492.65, change: .up(4.54), icon: "cpu.fill"),
+        Asset(ticker: "AMD", name: "Advanced Micro Devices", price: 117.42, change: .down(1.77), icon: "memorychip"),
+
         Asset(ticker: "TSLA", name: "Tesla", price: 247.12, change: .down(1.14), icon: "bolt.fill"),
-        Asset(ticker: "NFLX", name: "Netflix", price: 455.18, change: .up(0.78), icon: "film.fill"),
+        Asset(ticker: "F", name: "Ford Motor Company", price: 10.92, change: .up(0.41), icon: "car.fill"),
+        Asset(ticker: "TM", name: "Toyota Motor Corp", price: 188.73, change: .up(0.92), icon: "car.2.fill"),
+
         Asset(ticker: "AMZN", name: "Amazon", price: 136.44, change: .up(1.92), icon: "cart.fill"),
-        Asset(ticker: "NVDA", name: "NVIDIA", price: 492.65, change: .up(4.54), icon: "cpu.fill")
+        Asset(ticker: "WMT", name: "Walmart", price: 158.17, change: .down(0.22), icon: "cart.circle.fill"),
+
+        Asset(ticker: "NFLX", name: "Netflix", price: 455.18, change: .up(0.78), icon: "film.fill"),
+        Asset(ticker: "DIS", name: "Walt Disney Company", price: 91.53, change: .down(0.41), icon: "sparkles"),
+
+        Asset(ticker: "JPM", name: "JPMorgan Chase", price: 147.66, change: .up(0.57), icon: "banknote.fill"),
+        Asset(ticker: "V", name: "Visa Inc", price: 248.91, change: .up(0.89), icon: "creditcard.fill"),
+
+        Asset(ticker: "XOM", name: "Exxon Mobil", price: 102.24, change: .down(1.12), icon: "flame.fill")
     ]
 
     static let portfolioAssets: [PortfolioAsset] = [
@@ -96,6 +116,26 @@ enum MockData {
         invested: 9800,
         dailyChange: 2.4
     )
+    
+    static let userPortfolios: [UserPortfolio] = [
+            UserPortfolio(
+                name: "Основной портфель",
+                summary: portfolioSummary,
+                assets: portfolioAssets
+            ),
+            UserPortfolio(
+                name: "Технологии",
+                summary: PortfolioSummary(
+                    totalValue: 5500,
+                    invested: 4200,
+                    dailyChange: 1.1
+                ),
+                assets: [
+                    PortfolioAsset(asset: assets[0], amount: 10, invested: 1500),
+                    PortfolioAsset(asset: assets[4], amount: 3, invested: 2500)
+                ]
+            )
+        ]
 
     static let onboardingPages: [OnboardingPage] = [
         OnboardingPage(
@@ -115,5 +155,16 @@ enum MockData {
         GuideStep(title: "Портфель", description: "Детальные данные по активам и прибыли.", iconName: "briefcase.fill"),
         GuideStep(title: "Профиль", description: "Настройки, подписки и поддержка.", iconName: "person.crop.circle.fill")
     ]
+}
+
+extension Array where Element == UserPortfolio {
+    var combinedSummary: PortfolioSummary {
+        let totalValue = self.map { $0.summary.totalValue }.reduce(0, +)
+        let invested = self.map { $0.summary.invested }.reduce(0, +)
+        let dailyChange = self.map { $0.summary.dailyChange }.reduce(0, +)
+        return PortfolioSummary(totalValue: totalValue,
+                                invested: invested,
+                                dailyChange: dailyChange)
+    }
 }
 

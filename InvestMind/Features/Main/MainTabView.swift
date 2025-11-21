@@ -3,8 +3,7 @@ import SwiftUI
 
 struct MainTabView: View {
     var assets: [Asset]
-    var portfolio: [PortfolioAsset]
-    var summary: PortfolioSummary
+    var portfolios: [UserPortfolio]
 
     @State private var selectedTab = 0
     @State private var dashboardPath = NavigationPath()
@@ -26,27 +25,32 @@ struct MainTabView: View {
                 }
             }
             .tabItem {
-                Label("Главная", systemImage: "house.fill")
+                Label("Рынок", systemImage: "house.fill")
             }
             .tag(0)
 
             NavigationStack(path: $portfolioPath) {
-                PortfolioView(summary: summary, assets: portfolio, onOpenAsset: { asset in
-                    portfolioPath.append(AppRoute.stockDetail(asset))
-                })
-                    .navigationDestination(for: AppRoute.self) { route in
-                        switch route {
-                        case .stockDetail(let asset):
-                            StockDetailView(asset: asset)
-                        default:
-                            EmptyView()
+                PortfolioListView(portfolios: portfolios) { selectedPortfolio in
+                    portfolioPath.append(AppRoute.portfolioDetail(selectedPortfolio))
+                }
+                .navigationDestination(for: AppRoute.self) { route in
+                    switch route {
+                    case .portfolioDetail(let portfolio):
+                        PortfolioView(portfolio: portfolio) { asset in
+                            portfolioPath.append(AppRoute.stockDetail(asset))
                         }
+
+                    case .stockDetail(let asset):
+                        StockDetailView(asset: asset)
+
                     }
+                }
             }
             .tabItem {
-                Label("Портфель", systemImage: "briefcase.fill")
+                Label("Портфели", systemImage: "briefcase.fill")
             }
             .tag(1)
+
 
             NavigationStack {
                 ProfileView()

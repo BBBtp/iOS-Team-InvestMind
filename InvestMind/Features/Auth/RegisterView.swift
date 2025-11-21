@@ -21,63 +21,9 @@ struct RegisterView: View {
     }
 
     private var isFormValid: Bool {
-        let digitsOnly = phone.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-        return digitsOnly.count == 11 && 
-               !password.isEmpty && password.count >= 6 && 
-               !confirmPassword.isEmpty && password == confirmPassword
-    }
-    
-    private func formatPhoneNumber(_ phone: String) -> String {
-        var digits = phone.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-        
-        guard !digits.isEmpty else { return "" }
-        
-        // Если первый символ 8, заменяем на 7
-        if digits.first == "8" {
-            digits = "7" + String(digits.dropFirst())
-        }
-        
-        // Если первый символ не 7, добавляем 7
-        if digits.first != "7" {
-            digits = "7" + digits
-        }
-        
-        // Ограничиваем до 11 цифр
-        if digits.count > 11 {
-            digits = String(digits.prefix(11))
-        }
-        
-        var formatted = "+7"
-        
-        if digits.count > 1 {
-            let code = String(digits.dropFirst().prefix(3)) // первые 3 цифры кода
-            if !code.isEmpty {
-                formatted += " " + code
-            }
-            
-            if digits.count > 4 {
-                let firstPart = String(digits.dropFirst(4).prefix(3)) // следующие 3 цифры
-                if !firstPart.isEmpty {
-                    formatted += " " + firstPart
-                }
-                
-                if digits.count > 7 {
-                    let secondPart = String(digits.dropFirst(7).prefix(2)) // следующие 2 цифры
-                    if !secondPart.isEmpty {
-                        formatted += " " + secondPart
-                    }
-                    
-                    if digits.count > 9 {
-                        let thirdPart = String(digits.dropFirst(9).prefix(2)) // последние 2 цифры
-                        if !thirdPart.isEmpty {
-                            formatted += " " + thirdPart
-                        }
-                    }
-                }
-            }
-        }
-        
-        return formatted
+        PhoneFormatter.isValid(phone) &&
+        !password.isEmpty && password.count >= 6 &&
+        !confirmPassword.isEmpty && password == confirmPassword
     }
     
     var body: some View {
@@ -108,19 +54,9 @@ struct RegisterView: View {
                                     .textContentType(.telephoneNumber)
                                     .foregroundStyle(.black)
                                     .focused($focusedField, equals: .phone)
-                                    .onChange(of: phone) { oldValue, newValue in
-                                        let digits = newValue.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-                                        
-                                        if digits.isEmpty {
-                                            phone = ""
-                                        } else {
-                                            if digits.count > 11 {
-                                                phone = formatPhoneNumber(String(digits.prefix(11)))
-                                            } else {
-                                                phone = formatPhoneNumber(digits)
-                                            }
-                                        }
-                                        
+                                    .onChange(of: phone) { _, newValue in
+                                        phone = PhoneFormatter.format(newValue)
+
                                         if errors["phone"] != nil {
                                             withAnimation {
                                                 errors.removeValue(forKey: "phone")
@@ -406,9 +342,7 @@ struct RegisterView: View {
 
     private func validate() -> Bool {
         var result = true
-        let digitsOnly = phone.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-
-        if digitsOnly.count != 11 {
+        if !PhoneFormatter.isValid(phone) {
             errors["phone"] = "Введите корректный номер телефона"
             result = false
         }

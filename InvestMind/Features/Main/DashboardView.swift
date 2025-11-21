@@ -9,49 +9,29 @@ struct DashboardView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: AppSpacing.lg) {
-                header
-                stats
-                Text("Рекомендации")
-                    .font(AppTypography.headline(weight: .bold))
+
+                Text("Рынок")
+                    .font(AppTypography.largeTitle(weight: .bold))
                     .foregroundStyle(AppColors.textPrimary)
 
-                LazyVStack(spacing: AppSpacing.md) {
+                Text("Активы для покупки")
+                    .font(AppTypography.caption())
+                    .foregroundStyle(AppColors.textSecondary)
+
+                LazyVStack(spacing: 0) {
                     ForEach(assets) { asset in
-                        AssetCompactCard(asset: asset)
+                        MarketAssetRow(asset: asset)
                             .onTapGesture { onOpenAsset(asset) }
+
+                        Divider()
+                            .background(AppColors.backgroundSecondary)
                     }
                 }
+                .padding(.top, 8)
             }
             .padding()
         }
         .background(AppColors.backgroundPrimary.ignoresSafeArea())
-    }
-
-    private var header: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            Text("Добро пожаловать назад")
-                .font(AppTypography.caption())
-                .foregroundStyle(AppColors.textSecondary)
-            Text("Твой капитал растёт")
-                .font(AppTypography.largeTitle(weight: .bold))
-                .foregroundStyle(AppColors.textPrimary)
-        }
-    }
-
-    private var stats: some View {
-        HStack(spacing: AppSpacing.md) {
-            StatBadge(
-                title: "Портфель",
-                value: "$12 450",
-                trend: .up(2.4)
-            )
-
-            StatBadge(
-                title: "Доходность",
-                value: "+$1 150",
-                trend: .up(9.4)
-            )
-        }
     }
 }
 

@@ -8,6 +8,7 @@ struct OnboardingView: View {
     var onSelectLogin: () -> Void
 
     @State private var selection = 0
+    @State private var buttonsUnlocked = false
 
     var body: some View {
         ZStack {
@@ -47,6 +48,12 @@ struct OnboardingView: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.spring(response: 0.5, dampingFraction: 0.8), value: selection)
+                .onChange(of: selection) { oldValue, newValue in
+                    if newValue == pages.count - 1 {
+                        buttonsUnlocked = true
+                    }
+                    
+                }
 
                 HStack(spacing: AppSpacing.sm) {
                     ForEach(pages.indices, id: \.self) { index in
@@ -57,7 +64,7 @@ struct OnboardingView: View {
                     }
                 }
 
-                let showsButton = pages[min(selection, pages.count - 1)].showsAuthActions
+                let showsButton = pages[min(selection, pages.count - 1)].showsAuthActions || buttonsUnlocked
                 VStack(spacing: AppSpacing.sm) {
                     FilledButton(
                         title: "Начать бесплатно",
@@ -66,7 +73,7 @@ struct OnboardingView: View {
                         action: onStartFree
                     )
                     .opacity(showsButton ? 1.0 : 0.0)
-                    .frame(height: showsButton ? nil : 0)
+                    .animation(.easeInOut(duration: 0.4), value: showsButton)
                     
                     Button(action: onSelectLogin) {
                         Text("Уже есть аккаунт? Войти")

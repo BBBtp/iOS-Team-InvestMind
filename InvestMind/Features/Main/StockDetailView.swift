@@ -15,8 +15,6 @@ struct StockDetailView: View {
             .padding()
         }
         .background(AppColors.backgroundPrimary.ignoresSafeArea())
-        .navigationTitle(asset.ticker)
-        .navigationBarTitleDisplayMode(.inline)
     }
 
     private var header: some View {
@@ -63,11 +61,40 @@ struct StockDetailView: View {
     }
 
     private var actions: some View {
-        VStack(spacing: AppSpacing.sm) {
-            PrimaryButton(title: "Купить", action: {}, icon: "arrow.down.circle")
-            SecondaryButton(title: "Продать", action: {})
+        VStack(spacing: AppSpacing.md) {
+
+            // Купить
+            Button(action: {}) {
+                HStack {
+                    Image(systemName: "cart.fill.badge.plus")
+                        .font(.headline)
+                    Text("Купить")
+                        .font(AppTypography.headline(weight: .semibold))
+                }
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(AppColors.accentPrimary)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+
+            // Продать
+            Button(action: {}) {
+                HStack {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .font(.headline)
+                    Text("Продать")
+                        .font(AppTypography.headline(weight: .semibold))
+                }
+                .foregroundStyle(AppColors.danger)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(AppColors.danger.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
         }
     }
+
 }
 
 struct WaveformChart: Shape {

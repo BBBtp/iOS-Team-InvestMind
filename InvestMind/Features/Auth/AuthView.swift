@@ -19,61 +19,8 @@ struct AuthView: View {
     }
 
     private var isFormValid: Bool {
-        let digitsOnly = login.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-        return digitsOnly.count == 11 && !password.isEmpty && password.count >= 6
-    }
-    
-    private func formatPhoneNumber(_ phone: String) -> String {
-        var digits = phone.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-        
-        guard !digits.isEmpty else { return "" }
-        
-        // Если первый символ 8, заменяем на 7
-        if digits.first == "8" {
-            digits = "7" + String(digits.dropFirst())
-        }
-        
-        // Если первый символ не 7, добавляем 7
-        if digits.first != "7" {
-            digits = "7" + digits
-        }
-        
-        // Ограничиваем до 11 цифр
-        if digits.count > 11 {
-            digits = String(digits.prefix(11))
-        }
-        
-        var formatted = "+7"
-        
-        if digits.count > 1 {
-            let code = String(digits.dropFirst().prefix(3)) // первые 3 цифры кода
-            if !code.isEmpty {
-                formatted += " " + code
-            }
-            
-            if digits.count > 4 {
-                let firstPart = String(digits.dropFirst(4).prefix(3)) // следующие 3 цифры
-                if !firstPart.isEmpty {
-                    formatted += " " + firstPart
-                }
-                
-                if digits.count > 7 {
-                    let secondPart = String(digits.dropFirst(7).prefix(2)) // следующие 2 цифры
-                    if !secondPart.isEmpty {
-                        formatted += " " + secondPart
-                    }
-                    
-                    if digits.count > 9 {
-                        let thirdPart = String(digits.dropFirst(9).prefix(2)) // последние 2 цифры
-                        if !thirdPart.isEmpty {
-                            formatted += " " + thirdPart
-                        }
-                    }
-                }
-            }
-        }
-        
-        return formatted
+        PhoneFormatter.isValid(login) &&
+        !password.isEmpty && password.count >= 6
     }
     
     var body: some View {
@@ -104,19 +51,9 @@ struct AuthView: View {
                                     .textContentType(.telephoneNumber)
                                     .foregroundStyle(.black)
                                     .focused($focusedField, equals: .login)
-                                    .onChange(of: login) { oldValue, newValue in
-                                        let digits = newValue.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-                                        
-                                        if digits.isEmpty {
-                                            login = ""
-                                        } else {
-                                            if digits.count > 11 {
-                                                login = formatPhoneNumber(String(digits.prefix(11)))
-                                            } else {
-                                                login = formatPhoneNumber(digits)
-                                            }
-                                        }
-                                        
+                                    .onChange(of: login) { _, newValue in
+                                        login = PhoneFormatter.format(newValue)
+
                                         if errors["login"] != nil {
                                             withAnimation {
                                                 errors.removeValue(forKey: "login")
@@ -323,13 +260,10 @@ struct AuthView: View {
 
     private func validate() -> Bool {
         var result = true
-        let digitsOnly = login.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-
-        if digitsOnly.count != 11 {
+        if !PhoneFormatter.isValid(login) {
             errors["login"] = "Введите корректный номер телефона"
             result = false
         }
-
         if password.isEmpty || password.count < 6 {
             errors["password"] = "Минимум 6 символов"
             result = false

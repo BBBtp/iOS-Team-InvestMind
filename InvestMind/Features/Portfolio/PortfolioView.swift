@@ -2,8 +2,7 @@
 import SwiftUI
 
 struct PortfolioView: View {
-    let summary: PortfolioSummary
-    let assets: [PortfolioAsset]
+    let portfolio: UserPortfolio
     var onOpenAsset: (Asset) -> Void
 
     var body: some View {
@@ -15,7 +14,15 @@ struct PortfolioView: View {
             .padding()
         }
         .background(AppColors.backgroundPrimary.ignoresSafeArea())
-        .navigationTitle("Портфель")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(AppColors.backgroundPrimary, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(portfolio.name)
+                    .font(AppTypography.headline(weight: .bold))
+                    .foregroundStyle(AppColors.textPrimary)
+            }
+        }
     }
 
     private var header: some View {
@@ -24,13 +31,13 @@ struct PortfolioView: View {
                 .font(AppTypography.caption())
                 .foregroundStyle(AppColors.textSecondary)
 
-            Text(String(format: "$%.0f", summary.totalValue))
+            Text(String(format: "$%.0f", portfolio.summary.totalValue))
                 .font(AppTypography.largeTitle(weight: .bold))
                 .foregroundStyle(AppColors.textPrimary)
 
             HStack {
-                AssetChangeBadge(trend: .up(summary.dailyChange))
-                Text("Инвестировано: \(Int(summary.invested))$")
+                AssetChangeBadge(trend: .up(portfolio.summary.dailyChange))
+                Text("Инвестировано: \(Int(portfolio.summary.invested))$")
                     .font(AppTypography.caption())
                     .foregroundStyle(AppColors.textSecondary)
             }
@@ -47,11 +54,12 @@ struct PortfolioView: View {
                 .font(AppTypography.headline(weight: .bold))
                 .foregroundStyle(AppColors.textPrimary)
 
-            ForEach(assets) { item in
+            ForEach(portfolio.assets) { item in
                 VStack(alignment: .leading, spacing: AppSpacing.xs) {
                     HStack {
                         Text(item.asset.name)
                             .font(AppTypography.body(weight: .semibold))
+                            .foregroundStyle(AppColors.textPrimary)
                         Spacer()
                         Text(String(format: "$%.2f", item.asset.price))
                             .foregroundStyle(AppColors.textPrimary)

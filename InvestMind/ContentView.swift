@@ -8,6 +8,7 @@
 import SwiftUI
 struct ContentView: View {
     @State private var flowStep: FlowStep = .splash
+    @State private var isGoingForward = true
 
     var body: some View {
         ZStack {
@@ -23,16 +24,26 @@ struct ContentView: View {
             case .onboarding:
                 OnboardingView(
                     pages: MockData.onboardingPages,
-                    onStartFree: { flowStep = .survey },
-                    onSelectLogin: { flowStep = .auth }
+                    onStartFree: {
+                        isGoingForward = true
+                        flowStep = .survey
+                    },
+                    onSelectLogin: {
+                        isGoingForward = true
+                        flowStep = .auth
+                    }
                 )
-                .transition(.move(edge: .trailing))
+                .transition(isGoingForward
+                            ? .move(edge: .trailing)
+                            : .move(edge: .leading))
             case .survey:
                 SurveyView(
-                    onComplete: { flowStep = .register },
-                    onBack: { flowStep = .onboarding }
+                    onComplete: { isGoingForward = true; flowStep = .register },
+                    onBack: { isGoingForward = false; flowStep = .onboarding }
                 )
-                .transition(.move(edge: .trailing))
+                .transition(isGoingForward
+                            ? .move(edge: .trailing)
+                            : .move(edge: .leading))
             case .auth:
                 AuthView(
                     onAuthenticated: { flowStep = .postAuthGuide },
@@ -53,8 +64,7 @@ struct ContentView: View {
             case .main:
                 MainTabView(
                     assets: MockData.assets,
-                    portfolio: MockData.portfolioAssets,
-                    summary: MockData.portfolioSummary
+                    portfolios: MockData.userPortfolios
                 )
                 .transition(.move(edge: .bottom))
             }

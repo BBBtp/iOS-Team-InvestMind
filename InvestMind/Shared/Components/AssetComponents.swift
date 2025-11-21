@@ -29,6 +29,7 @@ struct AssetCompactCard: View {
         VStack(alignment: .leading, spacing: AppSpacing.sm) {
             HStack {
                 Image(systemName: asset.icon)
+                    .foregroundStyle(AppColors.textPrimary)
                     .frame(width: 40, height: 40)
                     .background(AppColors.backgroundSecondary)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -49,6 +50,7 @@ struct AssetCompactCard: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(String(format: "$%.2f", asset.price))
                     .font(AppTypography.title(weight: .bold))
+                    .foregroundStyle(AppColors.textPrimary)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .foregroundStyle(AppColors.textSecondary)
@@ -60,6 +62,44 @@ struct AssetCompactCard: View {
         .shadow(color: AppColors.cardShadow, radius: 12, y: 4)
     }
 }
+
+struct MarketAssetRow: View {
+    let asset: Asset
+
+    var body: some View {
+        HStack(spacing: AppSpacing.md) {
+            Image(systemName: asset.icon)
+                .foregroundStyle(AppColors.textPrimary)
+                .frame(width: 32, height: 32)
+                .background(AppColors.backgroundSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(asset.name)
+                    .font(AppTypography.body(weight: .semibold))
+                    .foregroundStyle(AppColors.textPrimary)
+
+                Text(asset.ticker)
+                    .font(AppTypography.caption())
+                    .foregroundStyle(AppColors.textSecondary)
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(String(format: "$%.2f", asset.price))
+                    .font(AppTypography.body(weight: .semibold))
+                    .foregroundStyle(AppColors.textPrimary)
+
+                AssetChangeBadge(trend: asset.change)
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 4)
+        .contentShape(Rectangle())
+    }
+}
+
 
 struct StatBadge: View {
     let title: String
